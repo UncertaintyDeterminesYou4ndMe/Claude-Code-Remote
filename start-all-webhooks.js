@@ -50,6 +50,21 @@ if (process.env.LINE_ENABLED === 'true' && process.env.LINE_CHANNEL_ACCESS_TOKEN
     processes.push({ name: 'LINE', process: lineProcess });
 }
 
+// Start Slack webhook if enabled
+if (process.env.SLACK_ENABLED === 'true' && process.env.SLACK_BOT_TOKEN) {
+    console.log('💬 Starting Slack webhook server...');
+    const slackProcess = spawn('node', ['start-slack-webhook.js'], {
+        stdio: ['inherit', 'inherit', 'inherit'],
+        env: process.env
+    });
+
+    slackProcess.on('exit', (code) => {
+        console.log(`💬 Slack webhook server exited with code ${code}`);
+    });
+
+    processes.push({ name: 'Slack', process: slackProcess });
+}
+
 // Start Email daemon if enabled
 if (process.env.EMAIL_ENABLED === 'true' && process.env.SMTP_USER) {
     console.log('📧 Starting email daemon...');

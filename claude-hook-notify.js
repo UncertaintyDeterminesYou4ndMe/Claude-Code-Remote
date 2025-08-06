@@ -35,6 +35,7 @@ if (fs.existsSync(envPath)) {
 const TelegramChannel = require('./src/channels/telegram/telegram');
 const DesktopChannel = require('./src/channels/local/desktop');
 const EmailChannel = require('./src/channels/email/smtp');
+const SlackChannel = require('./src/channels/slack/slack');
 
 async function sendHookNotification() {
     try {
@@ -87,6 +88,21 @@ async function sendHookNotification() {
             if (emailConfig.smtp.host && emailConfig.smtp.auth.user && emailConfig.to) {
                 const emailChannel = new EmailChannel(emailConfig);
                 channels.push({ name: 'Email', channel: emailChannel });
+            }
+        }
+
+        // Configure Slack channel if enabled
+        if (process.env.SLACK_ENABLED === 'true' && process.env.SLACK_BOT_TOKEN) {
+            const slackConfig = {
+                botToken: process.env.SLACK_BOT_TOKEN,
+                channelId: process.env.SLACK_CHANNEL_ID,
+                signingSecret: process.env.SLACK_SIGNING_SECRET,
+                appToken: process.env.SLACK_APP_TOKEN
+            };
+
+            if (slackConfig.botToken && slackConfig.channelId) {
+                const slackChannel = new SlackChannel(slackConfig);
+                channels.push({ name: 'Slack', channel: slackChannel });
             }
         }
         
